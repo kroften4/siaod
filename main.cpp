@@ -44,7 +44,7 @@ struct Node {
 
 template <typename DataT>
 class LinkedList {
-	private:
+private:
 	bool is_one_in_length() {
 		return first == last;
 	};
@@ -58,7 +58,33 @@ class LinkedList {
 		return p;
 	}
 
-	public:
+	bool remove_node(Node<DataT> * node) {
+		if (node == first) {
+			if (is_one_in_length()) {
+				last = nullptr;
+			}
+			Node<DataT> * trash = first;
+			first = first->next;
+			delete trash;
+		} else if (node == last) {
+			Node<DataT> * second_last = find_previous(last);
+			assert(second_last != nullptr);
+			delete last;
+			last = second_last;
+			last->next = nullptr;
+		} else {
+			Node<DataT> * previous = find_previous(node);
+			if (previous == nullptr) {
+				return false;
+			}
+			previous->next = node->next;
+			delete node;
+		}
+
+		return true;
+	}
+
+public:
 	Node<DataT> * first;
 	Node<DataT> * last;
 
@@ -102,51 +128,28 @@ class LinkedList {
 		assert(last->value == value);
 	};
 
-	bool remove_node(Node<DataT> * node) {
-		if (node == first) {
-			if (is_one_in_length()) {
-				last = nullptr;
-			}
-			Node<DataT> * trash = first;
-			first = first->next;
-			delete trash;
-		} else if (node == last) {
-			Node<DataT> * second_last = find_previous(last);
-			assert(second_last != nullptr);
-			delete last;
-			last = second_last;
-			last->next = nullptr;
+	void push_front(DataT value) {
+		auto * node = new Node<DataT>{value};
+		if (is_empty()) {
+			first = node;
+			last = node;
+		} else if (is_one_in_length()) {
+			first = node;
+			first->next = last;
 		} else {
-			Node<DataT> * previous = find_previous(node);
-			if (previous == nullptr) {
-				return false;
-			}
-			previous->next = node->next;
-			delete node;
+			Node<DataT> * second = first;
+			first = node;
+			first->next = second;
 		}
-
-		return true;
+		assert(first->value == value);
 	}
-
+	
 	bool remove_value(DataT value) {
 		Node<DataT> * p = first;
 		for (;p != nullptr && p->value != value; p = p->next) {}
 		return remove_node(p);
 	}
-	
-	bool remove_at(int index) {
-		int curr_idx = 0;
-		for (Node<DataT> * node = first; node != nullptr; node = node->next) {
-			if (curr_idx == index) {
-				bool check = remove_node(node);
-				assert(check);
-				return true;
-			}
-			curr_idx++;
-		}
-		return false;
-	}
-};
+};	
 
 template <typename DataT>
 std::ostream& operator<<(std::ostream& ost, const LinkedList<DataT> list) {
@@ -191,11 +194,11 @@ float evalPolynomial(LinkedList<PolynomialTerm> pl, float x) {
 int main() {
 
 	LinkedList<PolynomialTerm> list_1{};
-	list_1.push_back(PolynomialTerm(7, 0));
-	list_1.push_back(PolynomialTerm(1, 1));
+	list_1.push_front(PolynomialTerm(1, 1));
 	list_1.push_back(PolynomialTerm(2, 2));
 	list_1.push_back(PolynomialTerm(3, 3));
 	list_1.push_back(PolynomialTerm(4, 4));
+	list_1.push_front(PolynomialTerm(7, 0));
 	assert(evalPolynomial(list_1, 2) == 105);
 
 	LinkedList<PolynomialTerm> list_2{};
@@ -218,19 +221,10 @@ int main() {
 	assert(evalPolynomial(list_5, 10) == 200000);
 
 
-	list_1.remove_at(4);
-	std::cout << list_1 << '\n';
-	
-	list_1.remove_at(3);
-	std::cout << list_1 << '\n';
-
-	list_1.remove_value(PolynomialTerm(2, 2));
-	std::cout << list_1 << '\n';
-
 	list_1.remove_value(PolynomialTerm(1, 1));
 	std::cout << list_1 << '\n';
 
-	list_1.remove_at(0);
+	list_1.remove_value(PolynomialTerm(2, 2));
 	std::cout << list_1 << '\n';
 }
 
