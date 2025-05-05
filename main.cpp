@@ -16,7 +16,7 @@ public:
 	}
 
 	friend bool operator!=(const PolynomialTerm &l, const PolynomialTerm &r) {
-		return l.coefficient != r.coefficient && l.degree != r.degree;
+		return !(l == r);
 	}
 
 	friend std::ostream& operator<<(std::ostream& ost, const PolynomialTerm pt) {
@@ -162,7 +162,10 @@ std::ostream& operator<<(std::ostream& ost, const LinkedList<DataT> list) {
 	return ost;
 }
 
-std::ostream& operator<<(std::ostream& ost, const LinkedList<PolynomialTerm> list) {
+std::ostream& operator<<(std::ostream& ost, LinkedList<PolynomialTerm> list) {
+	if (list.is_empty()) {
+		return ost << 0;
+	}
 	for (auto node = list.first; node != nullptr; node = node->next) {
 		ost << node->value;
 		if (node != list.last) {
@@ -193,38 +196,66 @@ float evalPolynomial(LinkedList<PolynomialTerm> pl, float x) {
 
 int main() {
 
-	LinkedList<PolynomialTerm> list_1{};
-	list_1.push_front(PolynomialTerm(1, 1));
-	list_1.push_back(PolynomialTerm(2, 2));
-	list_1.push_back(PolynomialTerm(3, 3));
-	list_1.push_back(PolynomialTerm(4, 4));
-	list_1.push_front(PolynomialTerm(7, 0));
-	assert(evalPolynomial(list_1, 2) == 105);
 
-	LinkedList<PolynomialTerm> list_2{};
-	assert(evalPolynomial(list_2, 228) == 0);
+	std::cout << "Choose an option [1/2]:\n"
+		"1. Test via pregenerated list\n"
+		"2. Input your own list\n";
+	int option;
+	std::cin >> option;
+
+	LinkedList<PolynomialTerm> test_list;
+	switch (option) {
+	case 1:
+		test_list = LinkedList(std::vector{
+			PolynomialTerm(3, 0), 
+			PolynomialTerm(2, 2), 
+			PolynomialTerm(1, 3), 
+			PolynomialTerm(7, 6)
+		});
+		break;
+	case 2:
+		int length;
+		std::cout << "Enter the list length (amount of polynomial terms): ";
+		std::cin  >> length;
+		std::cout << "Enter coefficient and degree separated by space for each term"
+				"row by row in degree ascending order\n";
+		for (int i = 0; i < length; i++) {
+			float coefficient;
+			int degree;
+			std::cin >> coefficient >> degree;
+			test_list.push_back(PolynomialTerm(coefficient, degree));
+		}
+		break;
+	default:
+		std::cout << "Invalid option\n";
+		return -1;
+	}
+
+	std::cout << "\nTESTING `LinkedList` output\n" << test_list << '\n';
+
+	std::cout << "\nTESTING `push_front`\n";
+	std::cout << "Enter coefficient and degree separated by space \n";
+	float coefficient;
+	int degree;
+	std::cin >> coefficient >> degree;
+	std::cout << "before: " << test_list << '\n';
+	test_list.push_front(PolynomialTerm(coefficient, degree));
+	std::cout << "after: " << test_list << '\n';
+
 	
-	LinkedList<PolynomialTerm> list_3{};
-	list_3.push_back(PolynomialTerm(3, 0));
-	assert(evalPolynomial(list_3, 228) == 3);
-
-	LinkedList<PolynomialTerm> list_4(std::vector{
-		PolynomialTerm(3, 0), 
-		PolynomialTerm(2, 2), 
-		PolynomialTerm(1, 3), 
-		PolynomialTerm(7, 6)
-	});
-	assert(evalPolynomial(list_4, 3) == 5151);
-
-	LinkedList<PolynomialTerm> list_5{};
-	list_5.push_back(PolynomialTerm(2, 5));
-	assert(evalPolynomial(list_5, 10) == 200000);
+	std::cout << "\nTESTING `remove_value`\n";
+	std::cout << "Enter coefficient and degree separated by space \n";
+	std::cin >> coefficient >> degree;
+	std::cout << "before: " << test_list << '\n';
+	test_list.remove_value(PolynomialTerm(coefficient, degree));
+	std::cout << "after: " << test_list << '\n';
 
 
-	list_1.remove_value(PolynomialTerm(1, 1));
-	std::cout << list_1 << '\n';
-
-	list_1.remove_value(PolynomialTerm(2, 2));
-	std::cout << list_1 << '\n';
+	std::cout << "\nTESTING `evalPolynomial`\n";
+	std::cout << "Enter x to compute the polynomial for: ";
+	float variable;
+	std::cin >> variable;
+	std::cout << test_list << " (for x=" << variable << ") = " 
+		<< evalPolynomial(test_list, variable) << '\n';
 }
 
