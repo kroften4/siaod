@@ -128,11 +128,11 @@ class LinkedList {
 		return true;
 	}
 
-	// bool remove_value(DataT value) {
-	// 	Node<DataT> * p = first;
-	// 	for (;p != nullptr && p->value != value; p = p->next) {}
-	// 	return remove_node(p);
-	// }
+	bool remove_value(DataT value) {
+		Node<DataT> * p = first;
+		for (;p != nullptr && p->value != value; p = p->next) {}
+		return remove_node(p);
+	}
 	
 	bool remove_at(int index) {
 		int curr_idx = 0;
@@ -147,6 +147,17 @@ class LinkedList {
 		return false;
 	}
 };
+
+template <typename DataT>
+std::ostream& operator<<(std::ostream& ost, const LinkedList<DataT> list) {
+	for (auto node = list.first; node != nullptr; node = node->next) {
+		ost << node->value;
+		if (node != list.last) {
+			 ost << ' ';
+		}
+	}
+	return ost;
+}
 
 std::ostream& operator<<(std::ostream& ost, const LinkedList<PolynomialTerm> list) {
 	for (auto node = list.first; node != nullptr; node = node->next) {
@@ -213,11 +224,11 @@ int main() {
 	list_1.remove_at(3);
 	std::cout << list_1 << '\n';
 
-	// list_1.remove_value(PolynomialTerm(2, 2));
-	// std::cout << list_1 << '\n';
-	//
-	// list_1.remove_value(PolynomialTerm(1, 1));
-	// std::cout << list_1 << '\n';
+	list_1.remove_value(PolynomialTerm(2, 2));
+	std::cout << list_1 << '\n';
+
+	list_1.remove_value(PolynomialTerm(1, 1));
+	std::cout << list_1 << '\n';
 
 	list_1.remove_at(0);
 	std::cout << list_1 << '\n';
