@@ -4,43 +4,44 @@
 #include "Node.h"
 #include <iostream>
 #include <vector>
+#include <cstddef>
 
 #include <cassert>
 
 namespace krft {
 
-template <typename DataT>
+template <typename T>
 class LinkedList {
 private:
 	bool is_one_in_length() {
 		return first == last;
 	};
 
-	Node<DataT> * find_previous(Node<DataT> * node) {
+	Node<T> *find_previous(Node<T> *node) {
 		if (empty() || is_one_in_length()) {
 			return nullptr;
 		}
-		Node<DataT> * p = first;
+		Node<T> *p = first;
 		for (;p->next != node && p != nullptr; p = p->next) {}
 		return p;
 	}
 
-	bool remove_node(Node<DataT> * node) {
+	bool remove_node(Node<T> *node) {
 		if (node == first) {
 			if (is_one_in_length()) {
 				last = nullptr;
 			}
-			Node<DataT> * trash = first;
+			Node<T> *trash = first;
 			first = first->next;
 			delete trash;
 		} else if (node == last) {
-			Node<DataT> * second_last = find_previous(last);
+			Node<T> *second_last = find_previous(last);
 			assert(second_last != nullptr);
 			delete last;
 			last = second_last;
 			last->next = nullptr;
 		} else {
-			Node<DataT> * previous = find_previous(node);
+			Node<T> *previous = find_previous(node);
 			if (previous == nullptr) {
 				return false;
 			}
@@ -52,51 +53,66 @@ private:
 	}
 
 public:
-	Node<DataT> * first;
-	Node<DataT> * last;
+	Node<T> *first;
+	Node<T> *last;
 
-	LinkedList() : first{nullptr}, last{nullptr} {};
+	LinkedList<T>() : first{nullptr}, last{nullptr} {};
 
-
-	LinkedList(std::vector<DataT> vec) {
+	LinkedList<T>(std::vector<T> vec) {
 		first = nullptr;
 		last = nullptr;
-		for (DataT ele : vec) {
+		for (T ele : vec) {
 			push_back(ele);
 		}
 	};
 
-	// ~LinkedList() {
-	// 	Node<DataT> * node = first;
-	// 	while (node != nullptr) {
-	// 		Node<DataT> * trash = node;
-	// 		node = node->next;
-	// 		delete trash;
-	// 	}
-	// }
+	LinkedList<T>(T array[], size_t size) {
+		first = nullptr;
+		last = nullptr;
+		for (int i = 0; i < size; i++) {
+			push_back(array[i]);
+		}
+	};
+
+	LinkedList<T>(const LinkedList<T>& other) {
+		first = nullptr;
+		last = nullptr;
+		for (Node<T> *p = other.first; p != nullptr; p = p->next) {
+			push_back(p->value);
+		}
+	}
+
+	~LinkedList() {
+		Node<T> *node = first;
+		while (node != nullptr) {
+			Node<T> *trash = node;
+			node = node->next;
+			delete trash;
+		}
+	}
 
 	bool empty() {
 		return first == nullptr;
 	};
 
-	void pop_back(DataT value) {
+	void pop_back(T value) {
 		remove_node(last);
 	}
 
-	void pop_front(DataT value) {
+	void pop_front(T value) {
 		remove_node(first);
 	}
 
-	DataT back() {
+	T back() {
 		return last->value;
 	}
 
-	DataT front() {
+	T front() {
 		return first->value;
 	}
 
-	void push_back(DataT value) {
-		auto * node = new Node<DataT>{value};
+	void push_back(T value) {
+		auto *node = new Node<T>{value};
 		if (empty()) {
 			first = node;
 			last = node;
@@ -111,8 +127,8 @@ public:
 		assert(last->value == value);
 	};
 
-	void push_front(DataT value) {
-		auto * node = new Node<DataT>{value};
+	void push_front(T value) {
+		auto *node = new Node<T>{value};
 		if (empty()) {
 			first = node;
 			last = node;
@@ -120,22 +136,22 @@ public:
 			first = node;
 			first->next = last;
 		} else {
-			Node<DataT> * second = first;
+			Node<T> *second = first;
 			first = node;
 			first->next = second;
 		}
 		assert(first->value == value);
 	}
-	
-	bool remove_value(DataT value) {
-		Node<DataT> * p = first;
+
+	bool remove_value(T value) {
+		Node<T> *p = first;
 		for (;p != nullptr && p->value != value; p = p->next) {}
 		return remove_node(p);
 	}
 };
 
-template <typename DataT>
-std::ostream& operator<<(std::ostream& ost, const LinkedList<DataT> list) {
+template <typename T>
+std::ostream& operator<<(std::ostream& ost, const LinkedList<T> list) {
 	for (auto node = list.first; node != nullptr; node = node->next) {
 		ost << node->value;
 		if (node != list.last) {

@@ -1,23 +1,24 @@
 #ifndef __DYNAMICARRAY_H__
 #define __DYNAMICARRAY_H__
 
+#include <algorithm>
 #include <iostream>
-#include <istream>
 #include <stdexcept>
+#include <cstddef>
 
 namespace krft {
 
 template <typename T>
 class DynamicArray {
 private:
-	int capacity;
-	int size;
+	std::size_t capacity;
+	std::size_t _size;
 	T *array;
 
 	void extend() {
 		capacity *= 2;
-		T *new_array = new T[size * 2];
-		for (int i = 0; i < size; i++) {
+		T *new_array = new T[_size * 2];
+		for (std::size_t i = 0; i < _size; i++) {
 			new_array[i] = array[i];
 		}
 		delete[] array;
@@ -25,59 +26,94 @@ private:
 	}
 
 	void shrink() {
-		capacity = size;
-		T *new_array = new T[size];
-		for (int i = 0; i < size; i++) {
+		capacity = _size;
+		T *new_array = new T[_size];
+		for (std::size_t i = 0; i < _size; i++) {
 			new_array[i] = array[i];
 		}
 		delete[] array;
 		array = new_array;
 	}
 
-public:
-	DynamicArray(int arr[], int size) {
-		array = new T[size];
-		for (int i = 0; i < size; i++) {
-			array[i] = arr[i];
+	void increment_size() {
+		if (++_size > capacity) {
+			extend();
 		}
-		capacity = size;
-		this->size = size;
+	}
+
+public:
+	DynamicArray<T>(T array[], std::size_t size) : _size(size), capacity(capacity), array(new T[size]) {
+		std::copy(array, array + size, this->array);
+	}
+
+	DynamicArray<T>(const DynamicArray<T>& other) : _size(other._size), capacity(other.capacity), array(new T[other._size]) {
+		std::copy(other.array, other.array + other._size, this->array);
 	}
 	
 	~DynamicArray() {
 		delete[] array;
 	}
 
-	int get_size() {
-		return size;
+	int size() {
+		return _size;
 	}
 
-	void push_back(int value) {
-		if (size + 1 > capacity) {
-			extend();
+	bool empty() {
+		return _size == 0;
+	}
+
+	void push_back(T value) {
+		array[_size] = value;
+		increment_size();
+	}
+
+	void pop_back(T value) {
+		if (_size > 0)
+			_size--;
+	}
+
+	void insert_at(std::size_t index, T value) {
+		if (index < 0 || index >= _size) 
+			throw std::out_of_range("Bad index passed to insert_at()");
+		for (std::size_t i = _size; i > index; i--) {
+			array[i] = array[i - 1];
 		}
-		array[size] = value;
-		size++;
+		array[index] = value;
+		increment_size();
 	}
 
-	void pop_back(int value) {
-		if (size > 0)
-			size--;
+	void remove_at(std::size_t index) {
+		if (index < 0 || index >= _size) 
+			throw std::out_of_range("Bad index passed to remove_at()");
+		for (std::size_t i = index; i < _size; i++) {
+			array[i] = array[i + 1];
+		}
+		_size--;
 	}
 
-	T& operator[](int idx) {
-		if (idx >= size) 
-			throw std::out_of_range("Dynamimc array index out of range");
-		return array[idx];
+	T& at(size_t index) const {
+		if (index < 0 || index >= _size) 
+			throw std::out_of_range("Bad index passed to at()");
+		return array[index];
 	}
 
-	T operator[](int idx) const {
-		return array[idx];
+	T at(size_t index) {
+		if (index < 0 || index >= _size) 
+			throw std::out_of_range("Bad index passed to at()");
+		return array[index];
+	}
+
+	T& operator[](std::size_t index) {
+		return array[index];
+	}
+
+	T operator[](std::size_t index) const {
+		return array[index];
 	}
 
 	friend std::ostream& operator<<(std::ostream& ost, DynamicArray<T> arr) {
-		for (int i = 0; i < arr.get_size(); i++) {
-			ost << arr[i];
+		for (std::size_t i = 0; i < arr.size(); i++) {
+			ost << arr[i] << ' ';
 		}
 		return ost;
 	}
